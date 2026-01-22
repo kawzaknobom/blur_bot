@@ -61,12 +61,12 @@ async def Mp3_Conv(File):
   return Mp3_File
 
 async def Media_Compress(file_path,Rate=None):
-  mainDir = '/'.join(File.split('/')[:-1]) + '/'
+  mainDir = '/'.join(file_path.split('/')[:-1]) + '/'
   if file_path.lower().endswith(Audio_Forms) : 
-   Res_File = mainDir + File.split('/')[-1].split('.')[0] + '_Comp.mp3'
+   Res_File = mainDir + file_path.split('/')[-1].split('.')[0] + '_Comp.mp3'
    Comp_Cmd = f'ffmpeg -i "{file_path}" -b:a "{Rate}" "{Res_File}" -y '
   else :
-    Res_File = mainDir + File.split('/')[-1].split('.')[0] + '_Comp.mp4'
+    Res_File = mainDir + file_path.split('/')[-1].split('.')[0] + '_Comp.mp4'
     Comp_Cmd = f'ffmpeg -i "{file_path}" -c:v libx264 -crf 28 "{Res_File}" -y'
   os.system(Comp_Cmd)
   return Res_File
@@ -79,8 +79,8 @@ async def Vid_Mk(Vid,Aud):
   return Vid_Res
 
 async def Blur_Female(file_path):
-  mainDir = '/'.join(Vid.split('/')[:-1]) + '/'
-  P_Name = mainDir + Vid.split('/')[-1].split('.')[0]
+  mainDir = '/'.join(file_path.split('/')[:-1]) + '/'
+  P_Name = mainDir + file_path.split('/')[-1].split('.')[0]
   Ex = file_path.split('.')[-1]
   Res_File = f"{P_Name}_Blurred.{Ex}"
   Aud = await Mp3_Conv(file_path)
@@ -129,8 +129,8 @@ async def _telegram_file(client, message):
    await Reply.edit_text('تمت ')
   
   elif message.photo :
-    mainDir = '/'.join(Vid.split('/')[:-1]) + '/'
-    P_Name = mainDir + Vid.split('/')[-1].split('.')[0]
+    mainDir = '/'.join(Media_Path.split('/')[:-1]) + '/'
+    P_Name = mainDir + Media_Path.split('/')[-1].split('.')[0]
     Ex = Media_Path.split('.')[-1]
     Res_File = f"{P_Name}_Blurred.{Ex}"
     Blurred_Photo = segment(0.09,Media_Path)
@@ -153,4 +153,5 @@ def main():
             bot.stop()
 
 main()
+
 
