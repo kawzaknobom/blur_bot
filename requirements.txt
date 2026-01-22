@@ -1,7 +1,16 @@
-huggingface_hub
 pyrogram
 tgcrypto
 pillow
 audioread
 nest_asyncio
+ultralytics
+torch
+torchvision
+torchaudio
 opencv-python
+numpy
+Pillow
+transformers
+gradio
+huggingface-hub
+git+https://github.com/facebookresearch/segment-anything.git
