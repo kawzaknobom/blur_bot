@@ -12,6 +12,7 @@ from pyrogram.types import Message
 import os,shutil,cv2
 from detection import segment
 from PIL import Image
+import numpy as np
 
 Api_Id = 15952578
 Api_Hash = '3600ce5f8f9b9e18cba0f318fa0e3600'
@@ -98,6 +99,8 @@ async def Blur_Female(file_path):
     if ret:
       cv2.imwrite("detected_human.jpg", frame)
       frame = segment(0.09,'detected_human.jpg')
+      frame = np.array(frame)
+      frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
       # (humans, _) = detect_model.detectMultiScale(frame, winStride=(4, 4),padding=(0, 0), scale=1.05)
       # for (x,y,w,h) in humans:
       #     cv2.imwrite("detected_human.jpg", frame[y:y+h, x:x+w])
@@ -153,6 +156,7 @@ def main():
             bot.stop()
 
 main()
+
 
 
 
