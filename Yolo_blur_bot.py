@@ -137,7 +137,7 @@ async def _telegram_file(client, message):
     Blurred_Photo.save(Res_File)
     image_Orig = Image.open(Media_Path).convert("RGBA")
     image_mask = Image.open(Res_File).convert("RGBA")
-    result_image = remove_black_background_and_composite(image_mask, image_Orig,threshold=20 )
+    result_image = await remove_black_background_and_composite(image_mask, image_Orig,threshold=20 )
     result_image.save(Res_File)
     await message.reply_photo(Res_File)
     
@@ -153,5 +153,6 @@ def main():
             bot.stop()
 
 main()
+
 
 
