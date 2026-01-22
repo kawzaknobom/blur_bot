@@ -7,7 +7,7 @@ Bot_Token = os.getenv('TOKEN')
 
 ########################################################
 
-from pyrogram import Client,filters
+from pyrogram import Client, filters,enums,StopTransmission,idle
 from pyrogram.types import Message
 import os,shutil,cv2
 from detection import segment
@@ -153,3 +153,4 @@ def main():
             bot.stop()
 
 main()
+
