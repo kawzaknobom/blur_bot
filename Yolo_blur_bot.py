@@ -6,12 +6,16 @@ nest_asyncio.apply()
 Bot_Token = os.getenv('TOKEN')
 
 ########################################################
+from huggingface_hub import hf_hub_download
+sam_vit_h_4b8939 = hf_hub_download(repo_id="HCMUE-Research/SAM-vit-h", filename="sam_vit_h_4b8939")
 
 from pyrogram import Client,filters
 from pyrogram.types import Message
 import os,shutil,cv2
 from Cookies_File import Admin_Ids,Audio_Forms,Api_Id,Api_Hash
+
 from detection import segment
+
 from PIL import Image
 
 def Pyrogram_Client(Bot_Token):
@@ -144,3 +148,4 @@ async def _telegram_file(client, message):
    
 
 bot.run()
+
