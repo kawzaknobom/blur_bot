@@ -12,7 +12,7 @@ _model_loader_instance = None
 
 from huggingface_hub import hf_hub_download
 
-sam_vit_h_4b8939 = hf_hub_download(repo_id="HCMUE-Research/SAM-vit-h", filename="sam_vit_h_4b8939")
+sam_vit_h_4b8939 = hf_hub_download(repo_id="HCMUE-Research/SAM-vit-h", filename="sam_vit_h_4b8939.pth")
 yolov8x = hf_hub_download(repo_id="Ultralytics/YOLOv8", filename="yolov8x.pt")
 
 # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -184,3 +184,4 @@ demo = gr.Interface(
 if __name__ == "__main__":
 
     demo.launch(server_name="localhost", server_port=8413)
+
