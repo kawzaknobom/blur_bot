@@ -1,0 +1,7 @@
+huggingface_hub
+pyrogram
+tgcrypto
+pillow
+audioread
+nest_asyncio
+opencv-python
