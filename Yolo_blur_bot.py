@@ -10,11 +10,12 @@ Bot_Token = os.getenv('TOKEN')
 from pyrogram import Client,filters
 from pyrogram.types import Message
 import os,shutil,cv2
-from Cookies_File import Admin_Ids,Audio_Forms,Api_Id,Api_Hash
-
 from detection import segment
-
 from PIL import Image
+
+Api_Id = 15952578
+Api_Hash = '3600ce5f8f9b9e18cba0f318fa0e3600'
+Audio_Forms = (".mp3",".ogg",".m4a",".aac",".flac",".wav",".wma",".opus",".3gpp")
 
 def Pyrogram_Client(Bot_Token):
   Bot_Identifier = Bot_Token.split(':')[0]
@@ -27,7 +28,7 @@ bot,Bot_Identifier = Pyrogram_Client(Bot_Token)
 Dl_Dir = f'./Blur_{Bot_Identifier}/'
 
 
-def remove_black_background_and_composite(foreground, background, threshold=5):
+async def remove_black_background_and_composite(foreground, background, threshold=5):
     datas = foreground.getdata()
     newData = []
     for item in datas:
@@ -116,7 +117,6 @@ async def Blur_Female(file_path):
 
 @bot.on_message(filters.command('start') & filters.private)
 async def command1(bot,message):
- if message.chat.id in Admin_Ids : 
    await message.reply('لبقية البوتات \n\n @sunnaybots')
 
 @bot.on_message(filters.private & filters.incoming & ( filters.video | filters.photo))
@@ -140,11 +140,16 @@ async def _telegram_file(client, message):
     result_image = remove_black_background_and_composite(image_mask, image_Orig,threshold=20 )
     result_image.save(Res_File)
     await message.reply_photo(Res_File)
-  Check_Dir(Dl_Dir)
     
 
-   
+def main():
+    if not os.path.exists(Dl_Dir): os.makedirs(Dl_Dir)
+    try:
+        bot.start()
+        print("✅ Blur Bot is ONLINE!")
+        idle()
+    finally:
+        if bot.is_connected:
+            bot.stop()
 
-bot.run()
-
-
+main()
