@@ -19,7 +19,7 @@ import numpy as np
 import cvlib as cv
 
 
-gender_model_path = 'gender_detection.model'
+gender_model_path = '/content/gender_detection.model'
 gender_model = load_model(gender_model_path)
 
 detect_model = cv2.HOGDescriptor()
