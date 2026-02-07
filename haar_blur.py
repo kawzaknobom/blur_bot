@@ -29,7 +29,7 @@ gender_net.load_weights('agender/age_gender_ssrnet/ssrnet_gender_3_3_3_64_1.0_1.
 
 ######### Detection Models ############
 
-face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_alt.xml')
+face_cascade = cv2.CascadeClassifier('/content/blur_bot/haarcascade_frontalface_alt.xml')
 
 #####################################
 
