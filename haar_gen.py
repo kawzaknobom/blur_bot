@@ -118,7 +118,7 @@ async def Blur_Female(file_path):
       for (x,y,w,h) in detections:
          cv2.imwrite("detected_object.jpg", frame[y:y+h, x:x+w])
          if not await is_male('detected_object.jpg'):
-            frame[y:y+h, x:x+w] = cv2.blur(frame[y:y+h, x:x+w], (51, 51))
+            frame = cv2.blur(frame)
       out.write(frame)
     else:
         break 
