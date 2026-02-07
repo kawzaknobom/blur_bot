@@ -23,7 +23,7 @@ gender_model = load_model(gender_model_path)
 
 ######### Detection Models ############
 
-face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_alt.xml')
+face_cascade = cv2.CascadeClassifier(''/content/blur_bot/haarcascade_frontalface_alt.xml')
 
 #####################################
 
