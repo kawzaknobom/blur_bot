@@ -115,7 +115,6 @@ async def Blur_Female(file_path):
         break 
   cap.release()
   out.release()
-  cv2.destroyAllWindows()
   Res_File = await Vid_Mk(Res_File,Aud)
   Res_File = await Media_Compress(Res_File)
   return Res_File
