@@ -12,7 +12,7 @@ from pyrogram.types import Message
 
 import cv2,os,shutil,math,sys
 import numpy as np
-import cvlib as cv
+import cv2 as cv
 
 ######### Gender Config #############
 
