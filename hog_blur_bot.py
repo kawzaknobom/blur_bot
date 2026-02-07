@@ -68,7 +68,7 @@ def Pyrogram_Client(Bot_Token):
   bot = Client(Session_file,api_id=Api_Id,api_hash=Api_Hash,bot_token=Bot_Token)
   return bot,Bot_Identifier
 
-def is_male(Img):
+async def is_male(Img):
     image = cv2.imread(Img)
     face, confidence = cv.detect_face(image)
     classes = ['man','woman']
