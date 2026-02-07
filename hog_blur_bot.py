@@ -11,10 +11,9 @@ from pyrogram import Client, filters,enums,StopTransmission,idle
 from pyrogram.types import Message
 
 import cv2,os,shutil
-import tf_keras as keras
-from keras.preprocessing.image import img_to_array
-from keras.models import load_model
-from keras.utils import get_file
+from tf_keras.preprocessing.image import img_to_array
+from tf_keras.models import load_model
+from tf_keras.utils import get_file
 import numpy as np
 import cvlib as cv
 
