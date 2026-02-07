@@ -3,5 +3,6 @@ tgcrypto
 opencv-python
 tensorflow
 tf-keras
+keras
 cvlib
 numpy
