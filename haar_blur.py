@@ -12,7 +12,6 @@ from pyrogram.types import Message
 
 import cv2,os,shutil,math,sys
 import numpy as np
-import cv2 as cv
 
 ######### Gender Config #############
 
@@ -30,7 +29,7 @@ gender_net.load_weights('agender/age_gender_ssrnet/ssrnet_gender_3_3_3_64_1.0_1.
 
 ######### Detection Models ############
 
-face_cascade = cv.CascadeClassifier('haarcascade_frontalface_alt.xml')
+face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_alt.xml')
 
 #####################################
 
