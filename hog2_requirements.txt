@@ -1,0 +1,7 @@
+pyrogram
+tgcrypto
+opencv-python
+tensorflow
+keras
+cvlib
+numpy
