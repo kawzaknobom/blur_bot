@@ -106,17 +106,18 @@ async def Blur_Female(file_path):
   out = cv2.VideoWriter(Res_File, fourcc, fps, (width, height))
   last_update_time = 0
   start_point = False 
+  ret_num = 0
   UPDATE_INTERVAL = 5 # seconds
   while(True):
     ret, frame = cap.read()
     if ret:
-      current_time = time.time()
-      if (current_time - last_update_time >= UPDATE_INTERVAL) or start_point == False :
+      ret_num += 1
+      if (ret_num%(int(fps)*5) == 0) or start_point == False :
         last_known_people = await get_persons(frame)
         Women_faces = await get_gender(frame)
         print(Women_faces)
-        start_point = True
-        last_update_time = current_time            
+        start_point = True            
+      
       if len(Women_faces) != 0 :
         for face in Women_faces :
             body = await is_body(face,last_known_people)
