@@ -114,6 +114,7 @@ async def Blur_Female(file_path):
       if (current_time - last_update_time >= UPDATE_INTERVAL) or start_point == False :
         last_known_people = await get_persons(frame)
         Women_faces = await get_gender(frame)
+        print(Women_faces)
         start_point = True
         last_update_time = current_time            
       
