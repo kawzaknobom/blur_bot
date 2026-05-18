@@ -15,6 +15,7 @@ import cv2,os,shutil,time
 
 model = YOLO('yolov8n.pt') 
 
+face_cascade = cv2.CascadeClassifier('/content/blur_bot/haarcascade_frontalface_alt.xml')
 
 Api_Id = 15952578
 Api_Hash = '3600ce5f8f9b9e18cba0f318fa0e3600'
@@ -111,14 +112,17 @@ async def Blur_Female(file_path):
   while(True):
     ret, frame = cap.read()
     if ret:
-      ret_num += 1
+     ret_num += 1
+     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+     detections = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5)
+     if len(detections) != 0 :
       if (ret_num%(int(fps)*5) == 0) or start_point == False :
         last_known_people = await get_persons(frame)
         Women_faces = await get_gender(frame)
         if len(Women_faces) == 0 :
           start_point = False      
         else :
-          start_point = True    
+          start_point = True 
       
       if len(Women_faces) != 0 :
         for face in Women_faces :
@@ -127,7 +131,7 @@ async def Blur_Female(file_path):
               x1, y1, x2, y2 = body
               frame[y1:y2,x1:x2] = cv2.blur(frame[y1:y2, x1:x2], (51, 51))
 
-      out.write(frame)
+     out.write(frame)
     else:
         break 
   cap.release()
