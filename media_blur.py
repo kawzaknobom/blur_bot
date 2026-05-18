@@ -135,7 +135,11 @@ async def Blur_Female(file_path,method):
   while(True):
     ret, frame = cap.read()
     if ret:
-      ret_num += 1
+     ret_num += 1
+     if method == 'framebyframe' :
+        last_known_people = await get_persons(frame)
+        Women_faces,Men_Faces = await get_gender(frame)
+     else :
       if (ret_num%(int(fps)*5) == 0) or start_point == False :
         last_known_people = await get_persons(frame)
         Women_faces,Men_Faces = await get_gender(frame)
@@ -144,15 +148,15 @@ async def Blur_Female(file_path,method):
         else :
           start_point = True 
       
-      if len(Women_faces) != 0 :
+     if len(Women_faces) != 0 :
         women_bodies = await get_bodies(Women_faces,last_known_people)
         for body in women_bodies :
            x1, y1, x2, y2 = body
-           if method == 'blur_female':
+           if method == 'blurfemale':
             frame[y1:y2,x1:x2] = cv2.blur(frame[y1:y2, x1:x2], (151, 151))
-           elif method == 'blur_frame':
+           elif method == 'blurframe':
               frame = cv2.blur(frame, (151, 151))
-      out.write(frame)
+     out.write(frame)
     else:
         break 
   cap.release()
@@ -176,8 +180,9 @@ async def _telegram_file(client, message):
   #  Vid_Path = await message.download(file_name=Dl_Dir)
   #  Blurred_Vid = await Blur_Female(Vid_Path)
    CHOOSE_UR_BUTTONS = [
-      [InlineKeyboardButton("حجب مواطن النساء في الفريم",callback_data='blur_female'+'_'+str(message.id))],
-      [InlineKeyboardButton("حجب الفريم بأكمله عند مواطن النساء ",callback_data='blur_frame'+'_'+str(message.id))]
+      [InlineKeyboardButton("حجب مواطن النساء - سريع وغير دقيق",callback_data='blurfemale'+'_'+str(message.id))],
+      [InlineKeyboardButton("حجب مواطن النساء - دقيق وبطيء",callback_data='framebyframe'+'_'+str(message.id))],
+      [InlineKeyboardButton("حجب الفريم بأكمله عند مواطن النساء ",callback_data='blurframe'+'_'+str(message.id))]
       ]
    await message.reply(text = "اختر ما يناسب",reply_markup = InlineKeyboardMarkup(CHOOSE_UR_BUTTONS))
   #  await Reply.edit_text('تمت ')
@@ -195,6 +200,7 @@ async def callback_query(CLIENT,CallbackQuery):
   Vid_Path = await file_msg.download(file_name=Dl_Dir)
   Blurred_Vid = await Blur_Female(Vid_Path,Method)
   await file_msg.reply_video(Blurred_Vid)
+  await Check_Dir(Dl_Dir)
 
 
 def main():
