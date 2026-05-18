@@ -196,9 +196,10 @@ async def callback_query(CLIENT,CallbackQuery):
   Method = Callback_List[0]
   Msg_Id = Callback_List[1]
   file_msg = await Get_Msg(bot,User_Id,Msg_Id)
-  await CallbackQuery.edit_message_text('جار العمل ...')
+  replied = await CallbackQuery.edit_message_text('جار العمل ...')
   Vid_Path = await file_msg.download(file_name=Dl_Dir)
   Blurred_Vid = await Blur_Female(Vid_Path,Method)
+  await replied.edit_text('تمت')
   await file_msg.reply_video(Blurred_Vid)
   await Check_Dir(Dl_Dir)
 
