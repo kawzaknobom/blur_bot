@@ -6,16 +6,16 @@ nest_asyncio.apply()
 Bot_Token = os.getenv('TOKEN')
 
 ########################################################
-
 from pyrogram import Client, filters,enums,StopTransmission,idle
+from pyrogram.types import InlineKeyboardMarkup , InlineKeyboardButton , CallbackQuery , ForceReply,Message
+from pyrogram.errors import FloodWait
+from pyrogram.enums import MessageEntityType
 from pyrogram.types import Message
 from ultralytics import YOLO
 from deepface import DeepFace
 import cv2,os,shutil,time
 
 model = YOLO('yolov8n.pt') 
-
-face_cascade = cv2.CascadeClassifier('/content/blur_bot/haarcascade_frontalface_alt.xml')
 
 Api_Id = 15952578
 Api_Hash = '3600ce5f8f9b9e18cba0f318fa0e3600'
@@ -61,6 +61,16 @@ def Pyrogram_Client(Bot_Token):
   bot = Client(Session_file,api_id=Api_Id,api_hash=Api_Hash,bot_token=Bot_Token)
   return bot,Bot_Identifier
 
+async def Get_Msg(bot,Chat_id,msg_id):
+  try : 
+     msg = await bot.get_messages(int(Chat_id),int(msg_id))
+     return msg
+  except FloodWait as e :
+      time.sleep(e.value)
+      return await Get_Msg(bot,Chat_id,msg_id)
+  except Exception as err : 
+      pass
+  
 async def get_gender(frame):
     Women_Faces = []
     Men_Faces = []
@@ -103,7 +113,7 @@ async def get_bodies(facebboxlist,bodybboxlist):
           bodies.append(bodybbox)
   return bodies
    
-async def Blur_Female(file_path):
+async def Blur_Female(file_path,method):
   mainDir = '/'.join(file_path.split('/')[:-1]) + '/'
   P_Name = mainDir + file_path.split('/')[-1].split('.')[0]
   Ex = file_path.split('.')[-1]
@@ -135,12 +145,13 @@ async def Blur_Female(file_path):
           start_point = True 
       
       if len(Women_faces) != 0 :
-        men_bodies = await get_bodies(Men_Faces,last_known_people)
-        women_bodies = [item for item in last_known_people if item not in men_bodies]
+        women_bodies = await get_bodies(Women_faces,last_known_people)
         for body in women_bodies :
            x1, y1, x2, y2 = body
-           frame[y1:y2,x1:x2] = cv2.blur(frame[y1:y2, x1:x2], (51, 51))
-
+           if method == 'blur_female':
+            frame[y1:y2,x1:x2] = cv2.blur(frame[y1:y2, x1:x2], (151, 151))
+           elif method == 'blur_frame':
+              frame = cv2.blur(frame, (151, 151))
       out.write(frame)
     else:
         break 
@@ -161,12 +172,29 @@ async def command1(bot,message):
 @bot.on_message(filters.private & filters.incoming & ( filters.video))
 async def _telegram_file(client, message):
   if message.video :
-   Reply = await message.reply('جار العمل ...')
-   Vid_Path = await message.download(file_name=Dl_Dir)
-   Blurred_Vid = await Blur_Female(Vid_Path)
-   await message.reply_video(Blurred_Vid)
-   await Reply.edit_text('تمت ')
-   await Check_Dir(Dl_Dir)
+  #  Reply = await message.reply('جار العمل ...')
+  #  Vid_Path = await message.download(file_name=Dl_Dir)
+  #  Blurred_Vid = await Blur_Female(Vid_Path)
+   CHOOSE_UR_BUTTONS = [
+      [InlineKeyboardButton("حجب مواطن النساء في الفريم",callback_data='blur_female'+'_'+str(message.id))],
+      [InlineKeyboardButton("حجب الفريم بأكمله عند مواطن النساء ",callback_data='blur_frame'+'_'+str(message.id))]
+      ]
+   await message.reply(text = "اختر ما يناسب",reply_markup = InlineKeyboardMarkup(CHOOSE_UR_BUTTONS))
+  #  await Reply.edit_text('تمت ')
+  #  await Check_Dir(Dl_Dir)
+
+
+@bot.on_callback_query()
+async def callback_query(CLIENT,CallbackQuery):
+  User_Id = CallbackQuery.from_user.id
+  Callback_List = CallbackQuery.data.split('_')
+  Method = Callback_List[0]
+  Msg_Id = Callback_List[1]
+  file_msg = await Get_Msg(bot,User_Id,Msg_Id)
+  await CallbackQuery.edit_message_text('جار العمل ...')
+  Vid_Path = await file_msg.download(file_name=Dl_Dir)
+  Blurred_Vid = await Blur_Female(Vid_Path,Method)
+  await file_msg.reply_video(Blurred_Vid)
 
 
 def main():
