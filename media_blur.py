@@ -109,7 +109,7 @@ async def Blur_Female(file_path):
         gender = data["gender"]
         if y2 > y1 and x2 > x1:  
            if gender :
-              frame[y1:y2, x1:x2] = cv2.blur(frame[y1:y2, x1:x2], (51, 51))
+              frame[y1:y1+y2, x1:x1+x2] = cv2.blur(frame[y1:y1+y2, x1:x1+x2], (51, 51))
 
       out.write(frame)
     else:
