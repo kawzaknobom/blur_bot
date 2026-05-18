@@ -65,6 +65,7 @@ def Pyrogram_Client(Bot_Token):
 async def is_Female(frame):
     analysis = DeepFace.analyze(frame, actions=['gender'], enforce_detection=False)
     gender = analysis[0]['dominant_gender']
+    print(gender)
     return True if gender == 'Woman' else False
 
 
