@@ -97,7 +97,7 @@ async def Blur_Female(file_path):
          if r.boxes.id is not None:
             for box, track_id in zip(r.boxes.xyxy, r.boxes.id):
                 track_id = int(track_id)
-                x1, y1, x2, y2 = map(int, box.xyxy[0])
+                x1, y1, x2, y2 = map(int, box)
                 needs_update = False
                 person_crop = frame[y1:y2, x1:x2]
                 Gender = await is_Female(person_crop)
