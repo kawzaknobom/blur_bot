@@ -60,15 +60,34 @@ def Pyrogram_Client(Bot_Token):
   bot = Client(Session_file,api_id=Api_Id,api_hash=Api_Hash,bot_token=Bot_Token)
   return bot,Bot_Identifier
 
+async def get_gender(frame):
+    Women_Faces = []
+    analysis = DeepFace.analyze(frame, actions=['gender'], detector_backend='retinaface')
+    for face in analysis :
+       region = face['region']
+       x, y, w, h = region['x'], region['y'], region['w'], region['h']
+       if face['dominant_gender'] == 'Woman':
+        Women_Faces.append((x,y,w,h))
+    return Women_Faces
 
+async def get_persons(frame):
+   last_known_people = []
+   results = model.track(frame, classes=0, persist=True)
+   for r in results:
+         if r.boxes.id is not None:
+            for box, track_id in zip(r.boxes.xyxy, r.boxes.id):
+                track_id = int(track_id)
+                x1, y1, x2, y2 = map(int, box)
+                last_known_people.append((x1, y1, x2, y2))
+   return last_known_people
 
-async def is_Female(frame):
-    analysis = DeepFace.analyze(frame, actions=['gender'], enforce_detection=False)
-    gender = analysis[0]['dominant_gender']
-    print('Result is ')
-    print(gender)
-    return True if gender == 'Woman' else False
-
+async def is_body(facebbox,bodybboxlist):
+            fx1, fy1, fx2, fy2 = facebbox
+            for bodybbox in bodybboxlist :
+               bx1, by1, bx2, by2 = bodybbox
+               if (fx1 >= bx1 and fx2 <= bx2 and fy1 >= fy1 and fy2 <= by2) :
+                  return bodybbox
+            return False
 
 async def Blur_Female(file_path):
   mainDir = '/'.join(file_path.split('/')[:-1]) + '/'
@@ -85,7 +104,6 @@ async def Blur_Female(file_path):
   height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
   fourcc = cv2.VideoWriter_fourcc(*'mp4v')
   out = cv2.VideoWriter(Res_File, fourcc, fps, (width, height))
-  last_known_people = {}
   last_update_time = 0
   start_point = False 
   UPDATE_INTERVAL = 5 # seconds
@@ -94,29 +112,17 @@ async def Blur_Female(file_path):
     if ret:
       current_time = time.time()
       if (current_time - last_update_time >= UPDATE_INTERVAL) or start_point == False :
-        results = model.track(frame, classes=0, persist=True) # class 0 = person
-        last_known_people = {} # Clear old positions
-        for r in results:
-         if r.boxes.id is not None:
-            for box, track_id in zip(r.boxes.xyxy, r.boxes.id):
-                track_id = int(track_id)
-                x1, y1, x2, y2 = map(int, box)
-                needs_update = False
-                person_crop = frame[y1:y2, x1:x2]
-                Gender = await is_Female(person_crop)
-                if Gender :
-                    start_point = True
-                    last_known_people[track_id] = {"bbox": (x1, y1, x2, y2), "gender": Gender}
+        last_known_people = await get_persons(frame)
+        needs_update = False
+        Women_faces = await get_gender(frame)
+        start_point = True
         last_update_time = current_time            
-
-      for track_id, data in last_known_people.items():
-        x1, y1, x2, y2 = data["bbox"]
-        gender = data["gender"]
-        if y2 > y1 and x2 > x1:  
-           print('Gender is ')
-           print(gender)
-           if gender :
-              frame[y1:y2,x1:x2] = cv2.blur(frame[y1:y2, x1:x2], (51, 51))
+      
+      for face in Women_faces :
+         body = await is_body(face,last_known_people)
+         if body :
+            x1, y1, x2, y2 = body
+            frame[y1:y2,x1:x2] = cv2.blur(frame[y1:y2, x1:x2], (51, 51))
 
       out.write(frame)
     else:
