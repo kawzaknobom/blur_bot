@@ -85,12 +85,13 @@ async def Blur_Female(file_path):
   out = cv2.VideoWriter(Res_File, fourcc, fps, (width, height))
   last_known_people = {}
   last_update_time = 0
+  start_point = False 
   UPDATE_INTERVAL = 5 # seconds
   while(True):
     ret, frame = cap.read()
     if ret:
       current_time = time.time()
-      if current_time - last_update_time >= UPDATE_INTERVAL:
+      if (current_time - last_update_time >= UPDATE_INTERVAL) or start_point == False :
         results = model.track(frame, classes=0, persist=True) # class 0 = person
         last_known_people = {} # Clear old positions
         for r in results:
@@ -101,7 +102,9 @@ async def Blur_Female(file_path):
                 needs_update = False
                 person_crop = frame[y1:y2, x1:x2]
                 Gender = await is_Female(person_crop)
-                last_known_people[track_id] = {"bbox": (x1, y1, x2, y2), "gender": Gender}
+                if Gender :
+                    start_point = True
+                    last_known_people[track_id] = {"bbox": (x1, y1, x2, y2), "gender": Gender}
         last_update_time = current_time            
 
       for track_id, data in last_known_people.items():
