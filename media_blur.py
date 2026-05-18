@@ -11,7 +11,7 @@ from pyrogram import Client, filters,enums,StopTransmission,idle
 from pyrogram.types import Message
 from ultralytics import YOLO
 from deepface import DeepFace
-import cv2,os,shutil
+import cv2,os,shutil,time
 
 model = YOLO('yolov8n.pt') 
 
@@ -67,6 +67,55 @@ async def is_Female(frame):
     gender = analysis[0]['dominant_gender']
     return True if gender == 'Woman' else False
 
+
+while cap.isOpened():
+    ret, frame = cap.read()
+    if not ret: break
+    
+    current_time = time.time()
+    
+    # 1. Update detections every 5 seconds
+    if current_time - last_update_time >= UPDATE_INTERVAL:
+        results = model.track(frame, classes=0, persist=True, verbose=False)
+        last_known_people = {} # Clear old positions
+        
+        for r in results:
+            if r.boxes.id is not None:
+                for box, track_id in zip(r.boxes.xyxy, r.boxes.id):
+                    track_id = int(track_id)
+                    x1, y1, x2, y2 = map(int, box)
+                    
+                    # Detect gender only when we update positions
+                    person_crop = frame[y1:y2, x1:x2]
+                    try:
+                        analysis = DeepFace.analyze(person_crop, actions=['gender'], 
+                                                    enforce_detection=False, silent=True)
+                        gender = analysis[0]['dominant_gender']
+                    except:
+                        gender = "Unknown"
+                        
+                    last_known_people[track_id] = {"bbox": (x1, y1, x2, y2), "gender": gender}
+        
+        last_update_time = current_time
+
+    # 2. Blur based on last known positions (Runs every frame)
+    for track_id, data in last_known_people.items():
+        x1, y1, x2, y2 = data["bbox"]
+        gender = data["gender"]
+        
+        # Ensure valid coordinates
+        if y2 > y1 and x2 > x1:
+            roi = frame[y1:y2, x1:x2]
+            frame[y1:y2, x1:x2] = cv2.GaussianBlur(roi, (51, 51), 0)
+            cv2.putText(frame, f"ID:{track_id} {gender}", (x1, y1 - 10), 
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 255, 255), 2)
+
+    cv2.imshow('Interval Blur', frame)
+    if cv2.waitKey(1) == ord('q'): break
+
+cap.release()
+cv2.destroyAllWindows()
+
 async def Blur_Female(file_path):
   mainDir = '/'.join(file_path.split('/')[:-1]) + '/'
   P_Name = mainDir + file_path.split('/')[-1].split('.')[0]
@@ -82,21 +131,35 @@ async def Blur_Female(file_path):
   height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
   fourcc = cv2.VideoWriter_fourcc(*'mp4v')
   out = cv2.VideoWriter(Res_File, fourcc, fps, (width, height))
+  last_known_people = {}
+  last_update_time = 0
+  UPDATE_INTERVAL = 5 # seconds
   while(True):
     ret, frame = cap.read()
     if ret:
+      current_time = time.time()
+      if current_time - last_update_time >= UPDATE_INTERVAL:
         results = model.track(frame, classes=0, persist=True) # class 0 = person
+        last_known_people = {} # Clear old positions
         for r in results:
-            boxes = r.boxes
-            for box in boxes:
-                # Get coordinates for the whole body
-                x1, y1, x2, y2 = map(int, box.xyxy[0])
-                # 3. Crop the body/face area for gender analysis
+         if r.boxes.id is not None:
+            for box, track_id in zip(r.boxes.xyxy, r.boxes.id):
+                track_id = int(track_id)
+                x1, y1, x2, y2 = map(int, box)
+                needs_update = False
                 person_crop = frame[y1:y2, x1:x2]
-                if await is_Female(person_crop) :
-                   frame[y1:y2, x1:x2] = cv2.blur(frame[y1:y2, x1:x2], (51, 51))
+                Gender = await is_Female(person_crop)
+                last_known_people[track_id] = {"bbox": (x1, y1, x2, y2), "gender": Gender}
+        last_update_time = current_time            
 
-        out.write(frame)
+      for track_id, data in last_known_people.items():
+        x1, y1, x2, y2 = data["bbox"]
+        gender = data["gender"]
+        if y2 > y1 and x2 > x1:  
+           if gender :
+              frame[y1:y2, x1:x2] = cv2.blur(frame[y1:y2, x1:x2], (51, 51))
+
+      out.write(frame)
     else:
         break 
   cap.release()
