@@ -94,7 +94,7 @@ async def Blur_Female(file_path):
                 # 3. Crop the body/face area for gender analysis
                 person_crop = frame[y1:y2, x1:x2]
                 if await is_Female(person_crop) :
-                   frame[y1:y1+y2, x1:x1+x2] = cv2.blur(frame[y1:y2, x1:x2], (51, 51))
+                   frame[y1:y2, x1:x2] = cv2.blur(frame[y1:y2, x1:x2], (51, 51))
 
         out.write(frame)
     else:
