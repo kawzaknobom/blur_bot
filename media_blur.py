@@ -115,8 +115,10 @@ async def Blur_Female(file_path):
       if (ret_num%(int(fps)*5) == 0) or start_point == False :
         last_known_people = await get_persons(frame)
         Women_faces = await get_gender(frame)
-        print(Women_faces)
-        start_point = True            
+        if len(Women_faces) == 0 :
+          start_point = False      
+        else :
+          start_point = True    
       
       if len(Women_faces) != 0 :
         for face in Women_faces :
