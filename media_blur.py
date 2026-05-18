@@ -117,12 +117,12 @@ async def Blur_Female(file_path):
         print(Women_faces)
         start_point = True
         last_update_time = current_time            
-      
-      for face in Women_faces :
-         body = await is_body(face,last_known_people)
-         if body :
-            x1, y1, x2, y2 = body
-            frame[y1:y2,x1:x2] = cv2.blur(frame[y1:y2, x1:x2], (51, 51))
+      if len(Women_faces) != 0 :
+        for face in Women_faces :
+            body = await is_body(face,last_known_people)
+            if body :
+              x1, y1, x2, y2 = body
+              frame[y1:y2,x1:x2] = cv2.blur(frame[y1:y2, x1:x2], (51, 51))
 
       out.write(frame)
     else:
