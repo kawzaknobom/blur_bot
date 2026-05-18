@@ -1,0 +1,15 @@
+pyrogram
+tgcrypto
+opencv-python
+deepface
+pillow
+audioread
+nest_asyncio
+ultralytics
+torch
+torchvision
+torchaudio
+numpy
+transformers
+gradio
+huggingface-hub
