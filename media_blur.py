@@ -63,13 +63,16 @@ def Pyrogram_Client(Bot_Token):
 
 async def get_gender(frame):
     Women_Faces = []
-    analysis = DeepFace.analyze(frame, actions=['gender'], detector_backend='retinaface')
+    Men_Faces = []
+    analysis = DeepFace.analyze(frame, actions=['gender'], detector_backend='retinaface',enforce_detection =False)
     for face in analysis :
        region = face['region']
        x, y, w, h = region['x'], region['y'], region['w'], region['h']
        if face['dominant_gender'] == 'Woman':
         Women_Faces.append((x,y,w,h))
-    return Women_Faces
+       else : 
+        Men_Faces.append((x,y,w,h))
+    return Women_Faces,Men_Faces
 
 async def get_persons(frame):
    last_known_people = []
@@ -90,6 +93,16 @@ async def is_body(facebbox,bodybboxlist):
                   return bodybbox
             return False
 
+async def get_bodies(facebboxlist,bodybboxlist):
+  bodies = []
+  for bodybbox in bodybboxlist :
+      bx1, by1, bx2, by2 = bodybbox
+      for facebbox in facebboxlist :
+        fx1, fy1, fx2, fy2 = facebbox
+        if (fx1 >= bx1 and fx2 <= bx2 and fy1 >= fy1 and fy2 <= by2) :
+          bodies.append(bodybbox)
+  return bodies
+   
 async def Blur_Female(file_path):
   mainDir = '/'.join(file_path.split('/')[:-1]) + '/'
   P_Name = mainDir + file_path.split('/')[-1].split('.')[0]
@@ -112,26 +125,23 @@ async def Blur_Female(file_path):
   while(True):
     ret, frame = cap.read()
     if ret:
-     ret_num += 1
-     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-     detections = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5)
-     if len(detections) != 0 :
+      ret_num += 1
       if (ret_num%(int(fps)*5) == 0) or start_point == False :
         last_known_people = await get_persons(frame)
-        Women_faces = await get_gender(frame)
+        Women_faces,Men_Faces = await get_gender(frame)
         if len(Women_faces) == 0 :
           start_point = False      
         else :
           start_point = True 
       
       if len(Women_faces) != 0 :
-        for face in Women_faces :
-            body = await is_body(face,last_known_people)
-            if body :
-              x1, y1, x2, y2 = body
-              frame[y1:y2,x1:x2] = cv2.blur(frame[y1:y2, x1:x2], (51, 51))
+        men_bodies = await get_bodies(Men_Faces,last_known_people)
+        women_bodies = [item for item in last_known_people if item not in men_bodies]
+        for body in women_bodies :
+           x1, y1, x2, y2 = body
+           frame[y1:y2,x1:x2] = cv2.blur(frame[y1:y2, x1:x2], (51, 51))
 
-     out.write(frame)
+      out.write(frame)
     else:
         break 
   cap.release()
