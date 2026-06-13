@@ -92,6 +92,14 @@ async def is_male(Img):
       else :
             return False
 
+async def hog_getbodies(frame):
+      people = []
+      gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+      (humans, _) = detect_model.detectMultiScale(frame, winStride=(4, 4),padding=(0, 0), scale=1.05)
+      for (x,y,w,h) in humans:
+         people.append((x,y,w,h))
+      return people
+
 async def Blur_Female(file_path):
   mainDir = '/'.join(file_path.split('/')[:-1]) + '/'
   P_Name = mainDir + file_path.split('/')[-1].split('.')[0]
@@ -110,13 +118,13 @@ async def Blur_Female(file_path):
   while(True):
     ret, frame = cap.read()
     if ret:
-      gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-      (humans, _) = detect_model.detectMultiScale(frame, winStride=(4, 4),padding=(0, 0), scale=1.05)
-      for (x,y,w,h) in humans:
+       people = await hog_getbodies(frame)
+       for bbox in people :
+         x,y,w,h = bbox
          cv2.imwrite("detected_object.jpg", frame[y:y+h, x:x+w])
          if not await is_male('detected_object.jpg'):
             frame[y:y+h, x:x+w] = cv2.blur(frame[y:y+h, x:x+w], (51, 51))
-      out.write(frame)
+       out.write(frame)
     else:
         break 
   cap.release()
